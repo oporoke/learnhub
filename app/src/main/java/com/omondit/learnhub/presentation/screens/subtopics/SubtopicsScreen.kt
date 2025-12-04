@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -20,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Subtopic
 import com.omondit.learnhub.presentation.util.UiState
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,17 +90,17 @@ fun SubtopicsScreen(
 
 @Composable
 private fun SubtopicsList(
-    subtopics: List<Subtopic>,
+    subtopics: List<SubtopicWithProgress>,
     onSubtopicClick: (String) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(subtopics) { subtopic ->
+        items(subtopics) { subtopicWithProgress ->
             SubtopicCard(
-                subtopic = subtopic,
-                onClick = { onSubtopicClick(subtopic.id) }
+                subtopicWithProgress = subtopicWithProgress,
+                onClick = { onSubtopicClick(subtopicWithProgress.subtopic.id) }
             )
         }
     }
@@ -106,7 +108,7 @@ private fun SubtopicsList(
 
 @Composable
 private fun SubtopicCard(
-    subtopic: Subtopic,
+    subtopicWithProgress: SubtopicWithProgress,
     onClick: () -> Unit
 ) {
     Card(
@@ -115,7 +117,10 @@ private fun SubtopicCard(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer
+            containerColor = if (subtopicWithProgress.progress >= 100f)
+                MaterialTheme.colorScheme.tertiaryContainer
+            else
+                MaterialTheme.colorScheme.secondaryContainer
         )
     ) {
         Row(
@@ -124,11 +129,20 @@ private fun SubtopicCard(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Play icon
+            // Play icon or checkmark
             Icon(
-                imageVector = Icons.Default.PlayCircle,
-                contentDescription = "Start learning",
-                tint = MaterialTheme.colorScheme.primary,
+                imageVector = if (subtopicWithProgress.progress >= 100f)
+                    Icons.Default.CheckCircle
+                else
+                    Icons.Default.PlayCircle,
+                contentDescription = if (subtopicWithProgress.progress >= 100f)
+                    "Completed"
+                else
+                    "Start learning",
+                tint = if (subtopicWithProgress.progress >= 100f)
+                    MaterialTheme.colorScheme.tertiary
+                else
+                    MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(40.dp)
             )
 
@@ -138,25 +152,56 @@ private fun SubtopicCard(
             Column(
                 modifier = Modifier.weight(1f)
             ) {
-                Text(
-                    text = subtopic.name,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = subtopicWithProgress.subtopic.name,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.weight(1f)
+                    )
+
+                    if (subtopicWithProgress.progress > 0f) {
+                        Surface(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = MaterialTheme.shapes.small
+                        ) {
+                            Text(
+                                text = "${subtopicWithProgress.progress.roundToInt()}%",
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = subtopic.description,
+                    text = subtopicWithProgress.subtopic.description,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f),
                     lineHeight = 20.sp
                 )
+
+                if (subtopicWithProgress.progress > 0f && subtopicWithProgress.progress < 100f) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    LinearProgressIndicator(
+                        progress = { subtopicWithProgress.progress / 100f },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(4.dp),
+                    )
+                }
             }
         }
     }
 }
+
 
 @Composable
 private fun EmptyState(

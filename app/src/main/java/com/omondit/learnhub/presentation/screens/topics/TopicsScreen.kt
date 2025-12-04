@@ -20,6 +20,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Topic
 import com.omondit.learnhub.presentation.util.UiState
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,17 +89,17 @@ fun TopicsScreen(
 
 @Composable
 private fun TopicsList(
-    topics: List<Topic>,
+    topics: List<TopicWithProgress>,
     onTopicClick: (String) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(topics) { topic ->
+        items(topics) { topicWithProgress ->
             TopicCard(
-                topic = topic,
-                onClick = { onTopicClick(topic.id) }
+                topicWithProgress = topicWithProgress,
+                onClick = { onTopicClick(topicWithProgress.topic.id) }
             )
         }
     }
@@ -106,7 +107,7 @@ private fun TopicsList(
 
 @Composable
 private fun TopicCard(
-    topic: Topic,
+    topicWithProgress: TopicWithProgress,
     onClick: () -> Unit
 ) {
     Card(
@@ -126,7 +127,7 @@ private fun TopicCard(
                 modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = topic.name,
+                    text = topicWithProgress.topic.name,
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -135,7 +136,7 @@ private fun TopicCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = topic.description,
+                    text = topicWithProgress.topic.description,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 20.sp
@@ -143,12 +144,12 @@ private fun TopicCard(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Progress indicator (placeholder)
+                // Progress indicator
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     LinearProgressIndicator(
-                        progress = { 0f }, // TODO: Calculate actual progress
+                        progress = { topicWithProgress.progress / 100f },
                         modifier = Modifier
                             .weight(1f)
                             .height(6.dp),
@@ -157,9 +158,13 @@ private fun TopicCard(
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Text(
-                        text = "0%",
+                        text = "${topicWithProgress.progress.roundToInt()}%",
                         fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontWeight = FontWeight.SemiBold,
+                        color = if (topicWithProgress.progress > 0)
+                            MaterialTheme.colorScheme.primary
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
