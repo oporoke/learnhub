@@ -9,6 +9,7 @@ import com.omondit.learnhub.presentation.screens.home.HomeScreen
 import com.omondit.learnhub.presentation.screens.login.LoginScreen
 import com.omondit.learnhub.presentation.screens.splash.SplashScreen
 import com.omondit.learnhub.presentation.screens.subjects.SubjectsScreen
+import com.omondit.learnhub.presentation.screens.topics.TopicsScreen
 
 @Composable
 fun NavGraph(
@@ -75,6 +76,19 @@ fun NavGraph(
                 },
                 onSubjectClick = { subjectId ->
                     navController.navigate(Screen.Topics.createRoute(subjectId))
+                }
+            )
+        }
+
+        composable(Screen.Topics.route) { backStackEntry ->
+            val subjectId = backStackEntry.arguments?.getString("subjectId") ?: return@composable
+
+            TopicsScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onTopicClick = { topicId ->
+                    navController.navigate(Screen.Subtopics.createRoute(topicId))
                 }
             )
         }
