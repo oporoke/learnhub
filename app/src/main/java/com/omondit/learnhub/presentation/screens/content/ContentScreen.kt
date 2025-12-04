@@ -7,6 +7,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.outlined.Circle
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +74,8 @@ fun ContentScreen(
                         ContentPager(
                             contentList = state.data,
                             currentIndex = currentIndex,
-                            onIndexChange = { viewModel.goToContent(it) }
+                            onIndexChange = { viewModel.goToContent(it) },
+                            viewModel = viewModel
                         )
                     }
                 }
@@ -93,7 +96,8 @@ fun ContentScreen(
 private fun ContentPager(
     contentList: List<Content>,
     currentIndex: Int,
-    onIndexChange: (Int) -> Unit
+    onIndexChange: (Int) -> Unit,
+    viewModel: ContentViewModel
 ) {
     val pagerState = rememberPagerState(
         initialPage = currentIndex,
@@ -125,20 +129,29 @@ private fun ContentPager(
                     .align(Alignment.End)
             )
         }
-
+        val currentContentCompleted by viewModel.currentContentCompleted.collectAsStateWithLifecycle()
+        val markCompleteLoading by viewModel.markCompleteLoading.collectAsStateWithLifecycle()
         // Content pager
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.weight(1f)
         ) { page ->
-            ContentCard(content = contentList[page])
+            ContentCard(
+                content = contentList[page],
+                isCompleted = currentContentCompleted,
+                isLoading = markCompleteLoading,
+                onMarkComplete = { viewModel.markCurrentContentComplete() }
+            )
         }
     }
 }
 
 @Composable
 private fun ContentCard(
-    content: Content
+    content: Content,
+    isCompleted: Boolean,
+    isLoading: Boolean,
+    onMarkComplete: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -283,6 +296,43 @@ private fun ContentCard(
                     text = "Swipe left to continue to the next section",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Mark as Complete Button
+        Button(
+            onClick = onMarkComplete,
+            enabled = !isCompleted && !isLoading,
+            modifier = Modifier.fillMaxWidth(),
+            colors = if (isCompleted) {
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            } else {
+                ButtonDefaults.buttonColors()
+            }
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            } else {
+                Icon(
+                    imageVector = if (isCompleted)
+                        Icons.Filled.CheckCircle
+                    else
+                        Icons.Outlined.Circle,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = if (isCompleted) "Completed ✓" else "Mark as Complete",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

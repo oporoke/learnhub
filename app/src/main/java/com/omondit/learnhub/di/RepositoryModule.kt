@@ -4,10 +4,12 @@ import com.omondit.learnhub.data.repository.AuthRepositoryImpl
 import com.omondit.learnhub.data.repository.ContentRepositoryImpl
 import com.omondit.learnhub.data.repository.MockAuthRepositoryImpl
 import com.omondit.learnhub.data.repository.MockContentRepositoryImpl
+import com.omondit.learnhub.data.repository.ProgressRepositoryImpl
 import com.omondit.learnhub.data.repository.QuestionRepositoryImpl
 import com.omondit.learnhub.data.repository.TeacherRepositoryImpl
 import com.omondit.learnhub.domain.repository.AuthRepository
 import com.omondit.learnhub.domain.repository.ContentRepository
+import com.omondit.learnhub.domain.repository.ProgressRepository
 import com.omondit.learnhub.domain.repository.QuestionRepository
 import com.omondit.learnhub.domain.repository.TeacherRepository
 import dagger.Binds
@@ -43,4 +45,10 @@ abstract class RepositoryModule {
     abstract fun bindTeacherRepository(
         teacherRepositoryImpl: TeacherRepositoryImpl
     ): TeacherRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindProgressRepository(
+        progressRepositoryImpl: ProgressRepositoryImpl
+    ): ProgressRepository
 }
