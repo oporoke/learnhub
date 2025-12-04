@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.omondit.learnhub.presentation.screens.cklasses.ClassesScreen
 import com.omondit.learnhub.presentation.screens.home.HomeScreen
 import com.omondit.learnhub.presentation.screens.login.LoginScreen
 import com.omondit.learnhub.presentation.screens.splash.SplashScreen
@@ -49,6 +50,17 @@ fun NavGraph(
             HomeScreen(
                 onNavigateToClasses = {
                     navController.navigate(Screen.Classes.route)
+                }
+            )
+        }
+
+        composable(Screen.Classes.route) {
+            ClassesScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onClassClick = { classId ->
+                    navController.navigate(Screen.Subjects.createRoute(classId))
                 }
             )
         }
