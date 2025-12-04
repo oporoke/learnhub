@@ -62,15 +62,43 @@ class MockContentRepositoryImpl @Inject constructor() : ContentRepository {
     )
 
     // Mock Content
+    // Mock Content
     private val mockContent = listOf(
         Content(
             id = "content1",
             subtopicId = "linear_eq",
             creatorId = "creator1",
+            contentType = ContentType.TEXT,
+            body = ContentBody(
+                text = "A linear equation is an equation where the highest power of the variable is 1.\n\nExample: 2x + 3 = 7\n\nLinear equations form straight lines when graphed on a coordinate plane.",
+                imageUrl = null,
+                videoUrl = null
+            ),
+            status = ContentStatus.PUBLISHED,
+            createdAt = System.currentTimeMillis()
+        ),
+        Content(
+            id = "content2",
+            subtopicId = "linear_eq",
+            creatorId = "creator1",
             contentType = ContentType.TEXT_IMAGE,
             body = ContentBody(
-                text = "A linear equation is an equation where the highest power of the variable is 1. Example: 2x + 3 = 7",
-                imageUrl = null
+                text = "To solve a linear equation, isolate the variable on one side.\n\nSteps:\n1. Simplify both sides\n2. Move variables to one side\n3. Move constants to other side\n4. Divide to isolate variable",
+                imageUrl = "https://example.com/linear-equation-graph.png",
+                videoUrl = null
+            ),
+            status = ContentStatus.PUBLISHED,
+            createdAt = System.currentTimeMillis()
+        ),
+        Content(
+            id = "content3",
+            subtopicId = "linear_eq",
+            creatorId = "creator1",
+            contentType = ContentType.TEXT,
+            body = ContentBody(
+                text = "Practice Example:\n\nSolve: 3x + 5 = 14\n\nStep 1: Subtract 5 from both sides\n3x = 9\n\nStep 2: Divide both sides by 3\nx = 3\n\nTherefore, x = 3 is the solution!",
+                imageUrl = null,
+                videoUrl = null
             ),
             status = ContentStatus.PUBLISHED,
             createdAt = System.currentTimeMillis()

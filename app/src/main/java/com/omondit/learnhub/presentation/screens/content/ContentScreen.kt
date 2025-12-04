@@ -140,11 +140,13 @@ private fun ContentPager(
 private fun ContentCard(
     content: Content
 ) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(scrollState)
             .padding(24.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         // Content Type Badge
         Surface(
@@ -170,12 +172,20 @@ private fun ContentCard(
 
         // Text Content
         content.body.text?.let { text ->
-            Text(
-                text = text,
-                fontSize = 18.sp,
-                lineHeight = 28.sp,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Text(
+                    text = text,
+                    fontSize = 18.sp,
+                    lineHeight = 28.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
         }
 
         // Image placeholder
@@ -194,11 +204,21 @@ private fun ContentCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "🖼️\nImage would display here\n(URL: ${content.body.imageUrl})",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🖼️",
+                            fontSize = 48.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Image would display here",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
@@ -219,19 +239,30 @@ private fun ContentCard(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "🎥\nVideo player would display here\n(URL: ${content.body.videoUrl})",
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "🎥",
+                            fontSize = 48.sp
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Video player would display here",
+                            textAlign = TextAlign.Center,
+                            fontSize = 14.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Tip box
+        // Tip box - NOW ALWAYS VISIBLE
         Card(
+            modifier = Modifier.fillMaxWidth(),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.tertiaryContainer
             )
@@ -255,6 +286,9 @@ private fun ContentCard(
                 )
             }
         }
+
+        // Add bottom padding so tip box isn't cut off
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
