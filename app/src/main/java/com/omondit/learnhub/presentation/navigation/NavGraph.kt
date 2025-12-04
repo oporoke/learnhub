@@ -5,10 +5,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.omondit.learnhub.presentation.screens.cklasses.ClassesScreen
+import com.omondit.learnhub.presentation.screens.content.ContentScreen
 import com.omondit.learnhub.presentation.screens.home.HomeScreen
 import com.omondit.learnhub.presentation.screens.login.LoginScreen
 import com.omondit.learnhub.presentation.screens.splash.SplashScreen
 import com.omondit.learnhub.presentation.screens.subjects.SubjectsScreen
+import com.omondit.learnhub.presentation.screens.subtopics.SubtopicsScreen
 import com.omondit.learnhub.presentation.screens.topics.TopicsScreen
 
 @Composable
@@ -93,6 +95,27 @@ fun NavGraph(
             )
         }
 
+        composable(Screen.Subtopics.route) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getString("topicId") ?: return@composable
+
+            SubtopicsScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                },
+                onSubtopicClick = { subtopicId ->
+                    navController.navigate(Screen.Content.createRoute(subtopicId))
+                }
+            )
+        }
+        composable(Screen.Content.route) { backStackEntry ->
+            val subtopicId = backStackEntry.arguments?.getString("subtopicId") ?: return@composable
+
+            ContentScreen(
+                onNavigateBack = {
+                    navController.navigateUp()
+                }
+            )
+        }
         // More screens will be added here
     }
 }
