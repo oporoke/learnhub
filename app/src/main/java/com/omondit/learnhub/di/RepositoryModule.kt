@@ -2,6 +2,8 @@ package com.omondit.learnhub.di
 
 import com.omondit.learnhub.data.repository.AuthRepositoryImpl
 import com.omondit.learnhub.data.repository.ContentRepositoryImpl
+import com.omondit.learnhub.data.repository.MockAuthRepositoryImpl
+import com.omondit.learnhub.data.repository.MockContentRepositoryImpl
 import com.omondit.learnhub.data.repository.QuestionRepositoryImpl
 import com.omondit.learnhub.data.repository.TeacherRepositoryImpl
 import com.omondit.learnhub.domain.repository.AuthRepository
@@ -21,13 +23,13 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(
-        authRepositoryImpl: AuthRepositoryImpl
+        mockAuthRepositoryImpl: MockAuthRepositoryImpl // Changed to Mock
     ): AuthRepository
 
     @Binds
     @Singleton
     abstract fun bindContentRepository(
-        contentRepositoryImpl: ContentRepositoryImpl
+        mockContentRepositoryImpl: MockContentRepositoryImpl // Changed to Mock
     ): ContentRepository
 
     @Binds
