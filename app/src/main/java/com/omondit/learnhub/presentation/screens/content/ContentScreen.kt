@@ -29,6 +29,7 @@ import com.omondit.learnhub.presentation.util.UiState
 @Composable
 fun ContentScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToQuiz: (String) -> Unit,
     viewModel: ContentViewModel = hiltViewModel()
 ) {
     val contentState by viewModel.contentState.collectAsStateWithLifecycle()
@@ -75,7 +76,8 @@ fun ContentScreen(
                             contentList = state.data,
                             currentIndex = currentIndex,
                             onIndexChange = { viewModel.goToContent(it) },
-                            viewModel = viewModel
+                            viewModel = viewModel,
+                            onNavigateToQuiz = onNavigateToQuiz
                         )
                     }
                 }
@@ -97,7 +99,8 @@ private fun ContentPager(
     contentList: List<Content>,
     currentIndex: Int,
     onIndexChange: (Int) -> Unit,
-    viewModel: ContentViewModel
+    viewModel: ContentViewModel,
+    onNavigateToQuiz: (String) -> Unit
 ) {
     val pagerState = rememberPagerState(
         initialPage = currentIndex,
@@ -108,9 +111,7 @@ private fun ContentPager(
         onIndexChange(pagerState.currentPage)
     }
 
-    Column(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    Column(modifier = Modifier.fillMaxSize()) {
         // Progress indicator
         if (contentList.size > 1) {
             LinearProgressIndicator(
@@ -132,16 +133,56 @@ private fun ContentPager(
         val currentContentCompleted by viewModel.currentContentCompleted.collectAsStateWithLifecycle()
         val markCompleteLoading by viewModel.markCompleteLoading.collectAsStateWithLifecycle()
         // Content pager
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.weight(1f)
-        ) { page ->
+        HorizontalPager(state = pagerState, modifier = Modifier.weight(1f)) { page ->
             ContentCard(
                 content = contentList[page],
                 isCompleted = currentContentCompleted,
                 isLoading = markCompleteLoading,
                 onMarkComplete = { viewModel.markCurrentContentComplete() }
             )
+        }
+        // Quiz button (show only on last content)
+        if (pagerState.currentPage == contentList.size - 1 && currentContentCompleted) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Text(
+                        text = "🎯 Ready to Test Your Knowledge?",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = "Take a quiz to practice what you've learned",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Button(
+                        onClick = {
+                            onNavigateToQuiz(viewModel.subtopicId)
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "Start Quiz",
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
         }
     }
 }

@@ -27,7 +27,7 @@ class ContentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val subtopicId: String = checkNotNull(savedStateHandle["subtopicId"])
+    val subtopicId: String = checkNotNull(savedStateHandle["subtopicId"])
 
     private val _contentState = MutableStateFlow<UiState<List<Content>>>(UiState.Idle)
     val contentState: StateFlow<UiState<List<Content>>> = _contentState.asStateFlow()

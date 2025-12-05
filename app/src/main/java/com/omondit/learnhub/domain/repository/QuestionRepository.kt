@@ -3,6 +3,9 @@ package com.omondit.learnhub.domain.repository
 import com.omondit.learnhub.domain.model.Difficulty
 import com.omondit.learnhub.domain.model.Question
 import com.omondit.learnhub.domain.model.QuestionType
+import com.omondit.learnhub.domain.model.Quiz
+import com.omondit.learnhub.domain.model.QuizAttempt
+import com.omondit.learnhub.domain.model.QuizResult
 
 interface QuestionRepository {
     // Practice questions (for students)
@@ -28,4 +31,9 @@ interface QuestionRepository {
         questionTypes: List<QuestionType>,
         difficulty: Difficulty? = null
     ): Result<List<Question>>
+
+    // Quiz operations
+    suspend fun getQuizForSubtopic(subtopicId: String): Result<Quiz>
+    suspend fun submitQuizAttempt(attempt: QuizAttempt): Result<QuizResult>
+    suspend fun getQuizAttempts(userId: String, subtopicId: String): Result<List<QuizAttempt>>
 }
