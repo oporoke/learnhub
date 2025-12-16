@@ -27,7 +27,7 @@ class ContentViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val subtopicId: String = checkNotNull(savedStateHandle["subtopicId"])
+    val subtopicId: String? = savedStateHandle["subtopicId"]
 
     private val _contentState = MutableStateFlow<UiState<List<Content>>>(UiState.Idle)
     val contentState: StateFlow<UiState<List<Content>>> = _contentState.asStateFlow()
@@ -51,6 +51,12 @@ class ContentViewModel @Inject constructor(
     fun loadContent() {
         viewModelScope.launch {
             _contentState.value = UiState.Loading
+
+            // Validate subtopicId
+            if (subtopicId == null) {
+                _contentState.value = UiState.Error("Invalid subtopic ID")
+                return@launch
+            }
 
             // Get current user
             currentUserId = getCurrentUserUseCase()?.id
@@ -104,27 +110,29 @@ class ContentViewModel @Inject constructor(
         viewModelScope.launch {
             _markCompleteLoading.value = true
 
-            val result = markContentCompleteUseCase(
-                MarkContentCompleteUseCase.Params(
-                    userId = userId,
-                    contentId = currentContent.id,
-                    subtopicId = subtopicId
-                )
-            )
-
-            result.onSuccess {
-                _currentContentCompleted.value = true
-
-                // Update subtopic progress
-                val completedCount = getCompletedContentCount(userId)
-                updateSubtopicProgressUseCase(
-                    UpdateSubtopicProgressUseCase.Params(
+            subtopicId?.let { id ->
+                val result = markContentCompleteUseCase(
+                    MarkContentCompleteUseCase.Params(
                         userId = userId,
-                        subtopicId = subtopicId,
-                        totalContent = contentList.size,
-                        completedContent = completedCount
+                        contentId = currentContent.id,
+                        subtopicId = id
                     )
                 )
+
+                result.onSuccess {
+                    _currentContentCompleted.value = true
+
+                    // Update subtopic progress
+                    val completedCount = getCompletedContentCount(userId)
+                    updateSubtopicProgressUseCase(
+                        UpdateSubtopicProgressUseCase.Params(
+                            userId = userId,
+                            subtopicId = id,
+                            totalContent = contentList.size,
+                            completedContent = completedCount
+                        )
+                    )
+                }
             }
 
             _markCompleteLoading.value = false

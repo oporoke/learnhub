@@ -21,6 +21,8 @@ interface BookmarkRepository {
 
     suspend fun isBookmarked(userId: String, itemType: BookmarkType, itemId: String): Boolean
 
+    suspend fun getBookmarkedIds(userId: String, itemType: BookmarkType, itemIds: List<String>): Set<String>
+
     suspend fun toggleBookmark(
         userId: String,
         itemType: BookmarkType,

@@ -173,7 +173,7 @@ private fun ContentPager(
 
                     Button(
                         onClick = {
-                            onNavigateToQuiz(viewModel.subtopicId)
+                            viewModel.subtopicId?.let { onNavigateToQuiz(it) }
                         },
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -246,7 +246,7 @@ private fun ContentCard(
             }
         }
 
-        // Image placeholder
+        // Video player
         if (content.body.videoUrl != null) {
             Spacer(modifier = Modifier.height(24.dp))
 
@@ -256,71 +256,6 @@ private fun ContentCard(
                     .fillMaxWidth()
                     .height(250.dp)
             )
-        }
-//            Card(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(200.dp),
-//                colors = CardDefaults.cardColors(
-//                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-//                )
-//            ) {
-//                Box(
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Column(
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        Text(
-//                            text = "🖼️",
-//                            fontSize = 48.sp
-//                        )
-//                        Spacer(modifier = Modifier.height(8.dp))
-//                        Text(
-//                            text = "Image would display here",
-//                            textAlign = TextAlign.Center,
-//                            fontSize = 14.sp,
-//                            color = MaterialTheme.colorScheme.onSurfaceVariant
-//                        )
-//                    }
-//                }
-//            }
-//        }
-
-        // Video placeholder
-        if (content.body.videoUrl != null) {
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "🎥",
-                            fontSize = 48.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Video player would display here",
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
         }
         // PDF loading
         if (content.body.pdfUrl != null) {

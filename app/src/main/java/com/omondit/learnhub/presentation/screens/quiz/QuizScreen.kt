@@ -43,12 +43,14 @@ fun QuizScreen(
     LaunchedEffect(submitState) {
         if (submitState is UiState.Success) {
             val result = (submitState as UiState.Success<QuizResult>).data
-            onNavigateToResults(
-                viewModel.subtopicId,
-                result.score,
-                result.totalQuestions,
-                result.passed
-            )
+            viewModel.subtopicId?.let { subtopicId ->
+                onNavigateToResults(
+                    subtopicId,
+                    result.score,
+                    result.totalQuestions,
+                    result.passed
+                )
+            }
         }
     }
 

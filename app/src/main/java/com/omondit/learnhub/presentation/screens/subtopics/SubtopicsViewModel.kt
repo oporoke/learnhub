@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.omondit.learnhub.domain.model.BookmarkType
 import com.omondit.learnhub.domain.model.Subtopic
 import com.omondit.learnhub.domain.usecase.auth.GetCurrentUserUseCase
+import com.omondit.learnhub.domain.usecase.bookmark.GetBookmarkedIdsUseCase
 import com.omondit.learnhub.domain.usecase.bookmark.IsBookmarkedUseCase
 import com.omondit.learnhub.domain.usecase.bookmark.ToggleBookmarkUseCase
 import com.omondit.learnhub.domain.usecase.content.GetSubtopicsUseCase
@@ -33,7 +34,7 @@ class SubtopicsViewModel @Inject constructor(
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeSubtopicProgressUseCase: ObserveSubtopicProgressUseCase,
     private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
-    private val isBookmarkedUseCase: IsBookmarkedUseCase,
+    private val getBookmarkedIdsUseCase: GetBookmarkedIdsUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -72,16 +73,17 @@ class SubtopicsViewModel @Inject constructor(
         val userId = currentUserId ?: return
 
         viewModelScope.launch {
-            val bookmarked = mutableSetOf<String>()
-            subtopics.forEach { subtopic ->
-                if (isBookmarkedUseCase(userId, BookmarkType.SUBTOPIC, subtopic.id)) {
-                    bookmarked.add(subtopic.id)
-                }
-            }
+            // Batch query to avoid N+1 problem
+            val itemIds = subtopics.map { it.id }
+            val bookmarked = getBookmarkedIdsUseCase(
+                userId = userId,
+                itemType = BookmarkType.SUBTOPIC,
+                itemIds = itemIds
+            )
             _bookmarkedSubtopics.value = bookmarked
         }
     }
-    private val topicId: String = checkNotNull(savedStateHandle["topicId"])
+    private val topicId: String? = savedStateHandle["topicId"]
 
     private val _subtopicsState = MutableStateFlow<UiState<List<SubtopicWithProgress>>>(UiState.Idle)
     val subtopicsState: StateFlow<UiState<List<SubtopicWithProgress>>> = _subtopicsState.asStateFlow()
@@ -95,6 +97,12 @@ class SubtopicsViewModel @Inject constructor(
     fun loadSubtopics() {
         viewModelScope.launch {
             _subtopicsState.value = UiState.Loading
+
+            // Validate topicId
+            if (topicId == null) {
+                _subtopicsState.value = UiState.Error("Invalid topic ID")
+                return@launch
+            }
 
             // Get current user
             currentUserId = getCurrentUserUseCase()?.id

@@ -25,7 +25,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -90,6 +92,9 @@ dependencies {
 
     // DataStore (for preferences)
     implementation(libs.androidx.datastore.preferences)
+
+    // Security - EncryptedSharedPreferences
+    implementation(libs.androidx.security.crypto)
 
     // ExoPlayer for video playback
     implementation(libs.androidx.media3.exoplayer)

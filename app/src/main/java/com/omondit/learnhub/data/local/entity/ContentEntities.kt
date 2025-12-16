@@ -1,6 +1,7 @@
 package com.omondit.learnhub.data.local.entity
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "classes")
@@ -12,7 +13,10 @@ data class ClassEntity(
     val cachedAt: Long = System.currentTimeMillis()
 )
 
-@Entity(tableName = "subjects")
+@Entity(
+    tableName = "subjects",
+    indices = [Index(value = ["classId"])]
+)
 data class SubjectEntity(
     @PrimaryKey
     val id: String,
@@ -22,7 +26,10 @@ data class SubjectEntity(
     val cachedAt: Long = System.currentTimeMillis()
 )
 
-@Entity(tableName = "topics")
+@Entity(
+    tableName = "topics",
+    indices = [Index(value = ["subjectId"]), Index(value = ["order"])]
+)
 data class TopicEntity(
     @PrimaryKey
     val id: String,
@@ -33,7 +40,10 @@ data class TopicEntity(
     val cachedAt: Long = System.currentTimeMillis()
 )
 
-@Entity(tableName = "subtopics")
+@Entity(
+    tableName = "subtopics",
+    indices = [Index(value = ["topicId"]), Index(value = ["order"])]
+)
 data class SubtopicEntity(
     @PrimaryKey
     val id: String,
@@ -44,7 +54,10 @@ data class SubtopicEntity(
     val cachedAt: Long = System.currentTimeMillis()
 )
 
-@Entity(tableName = "content")
+@Entity(
+    tableName = "content",
+    indices = [Index(value = ["subtopicId"]), Index(value = ["creatorId"])]
+)
 data class ContentEntity(
     @PrimaryKey
     val id: String,
@@ -54,7 +67,7 @@ data class ContentEntity(
     val bodyText: String?,
     val bodyImageUrl: String?,
     val bodyVideoUrl: String?,
-    val bodyPdfUrl: String?, // Add this
+    val bodyPdfUrl: String?,
     val status: String,
     val createdAt: Long,
     val cachedAt: Long = System.currentTimeMillis()

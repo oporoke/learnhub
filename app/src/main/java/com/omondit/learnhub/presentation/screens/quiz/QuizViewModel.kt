@@ -26,7 +26,7 @@ class QuizViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val subtopicId: String = checkNotNull(savedStateHandle["subtopicId"])
+    val subtopicId: String? = savedStateHandle["subtopicId"]
 
     private val _quizState = MutableStateFlow<UiState<Quiz>>(UiState.Idle)
     val quizState: StateFlow<UiState<Quiz>> = _quizState.asStateFlow()
@@ -50,6 +50,12 @@ class QuizViewModel @Inject constructor(
     private fun loadQuiz() {
         viewModelScope.launch {
             _quizState.value = UiState.Loading
+
+            // Validate subtopicId
+            if (subtopicId == null) {
+                _quizState.value = UiState.Error("Invalid subtopic ID")
+                return@launch
+            }
 
             currentUserId = getCurrentUserUseCase()?.id
 
@@ -115,26 +121,28 @@ class QuizViewModel @Inject constructor(
         viewModelScope.launch {
             _submitState.value = UiState.Loading
 
-            val attempt = QuizAttempt(
-                userId = userId,
-                quizId = currentQuiz.id,
-                subtopicId = subtopicId,
-                answers = _answers.value,
-                totalQuestions = currentQuiz.questions.size
-            )
+            subtopicId?.let { id ->
+                val attempt = QuizAttempt(
+                    userId = userId,
+                    quizId = currentQuiz.id,
+                    subtopicId = id,
+                    answers = _answers.value,
+                    totalQuestions = currentQuiz.questions.size
+                )
 
-            val result = submitQuizAttemptUseCase(attempt)
+                val result = submitQuizAttemptUseCase(attempt)
 
-            result.fold(
-                onSuccess = { quizResult ->
-                    _submitState.value = UiState.Success(quizResult)
-                },
-                onFailure = { exception ->
-                    _submitState.value = UiState.Error(
-                        exception.message ?: "Failed to submit quiz"
-                    )
-                }
-            )
+                result.fold(
+                    onSuccess = { quizResult ->
+                        _submitState.value = UiState.Success(quizResult)
+                    },
+                    onFailure = { exception ->
+                        _submitState.value = UiState.Error(
+                            exception.message ?: "Failed to submit quiz"
+                        )
+                    }
+                )
+            }
         }
     }
 

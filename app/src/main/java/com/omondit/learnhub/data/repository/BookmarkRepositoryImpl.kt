@@ -82,6 +82,22 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getBookmarkedIds(
+        userId: String,
+        itemType: BookmarkType,
+        itemIds: List<String>
+    ): Set<String> {
+        return try {
+            val compositeIds = itemIds.map { "${userId}_${itemType.name}_${it}" }
+            bookmarkDao.getBookmarkedIds(compositeIds).map { id ->
+                // Extract itemId from composite id
+                id.substringAfterLast("_")
+            }.toSet()
+        } catch (e: Exception) {
+            emptySet()
+        }
+    }
+
     override suspend fun toggleBookmark(
         userId: String,
         itemType: BookmarkType,

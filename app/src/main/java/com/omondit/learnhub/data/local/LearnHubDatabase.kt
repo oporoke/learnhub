@@ -30,7 +30,7 @@ import com.omondit.learnhub.data.local.entity.TopicProgressEntity
         // Bookmarks
         BookmarkEntity::class
     ],
-    version = 2, // Incremented version
+    version = 3, // Incremented for indexes
     exportSchema = false
 )
 abstract class LearnHubDatabase : RoomDatabase() {

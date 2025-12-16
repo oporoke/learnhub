@@ -28,7 +28,7 @@ class TopicsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    private val subjectId: String = checkNotNull(savedStateHandle["subjectId"])
+    private val subjectId: String? = savedStateHandle["subjectId"]
 
     private val _topicsState = MutableStateFlow<UiState<List<TopicWithProgress>>>(UiState.Idle)
     val topicsState: StateFlow<UiState<List<TopicWithProgress>>> = _topicsState.asStateFlow()
@@ -43,6 +43,12 @@ class TopicsViewModel @Inject constructor(
     fun loadTopics() {
         viewModelScope.launch {
             _topicsState.value = UiState.Loading
+
+            // Validate subjectId
+            if (subjectId == null) {
+                _topicsState.value = UiState.Error("Invalid subject ID")
+                return@launch
+            }
 
             // Get current user
             currentUserId = getCurrentUserUseCase()?.id

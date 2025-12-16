@@ -52,6 +52,21 @@ fun PdfViewerComposable(
         }
     }
 
+    // Cleanup PDF file when component is disposed
+    DisposableEffect(pdfFile) {
+        onDispose {
+            pdfFile?.let { file ->
+                try {
+                    if (file.exists()) {
+                        file.delete()
+                    }
+                } catch (e: Exception) {
+                    // Log error but don't crash
+                }
+            }
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()

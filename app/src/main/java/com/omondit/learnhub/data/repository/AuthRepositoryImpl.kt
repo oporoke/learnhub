@@ -4,6 +4,7 @@ import com.omondit.learnhub.data.remote.api.AuthApiService
 import com.omondit.learnhub.data.remote.dto.LoginRequest
 import com.omondit.learnhub.data.remote.dto.RegisterRequest
 import com.omondit.learnhub.data.remote.mapper.toDomain
+import com.omondit.learnhub.data.security.SecureTokenStorage
 import com.omondit.learnhub.domain.model.User
 import com.omondit.learnhub.domain.repository.AuthRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,14 +14,12 @@ import javax.inject.Singleton
 
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
-    private val authApiService: AuthApiService
+    private val authApiService: AuthApiService,
+    private val secureTokenStorage: SecureTokenStorage
 ) : AuthRepository {
 
-    // In-memory storage for now (will use DataStore later)
     private val _currentUser = MutableStateFlow<User?>(null)
     private val currentUser: StateFlow<User?> = _currentUser
-
-    private var authToken: String? = null
 
     override suspend fun login(email: String, password: String): Result<User> {
         return try {
@@ -28,7 +27,7 @@ class AuthRepositoryImpl @Inject constructor(
 
             if (response.success && response.data != null) {
                 val user = response.data.user.toDomain()
-                authToken = response.data.token
+                secureTokenStorage.saveToken(response.data.token)
                 _currentUser.value = user
                 Result.success(user)
             } else {
@@ -59,7 +58,7 @@ class AuthRepositoryImpl @Inject constructor(
             val response = authApiService.logout()
 
             if (response.success) {
-                authToken = null
+                secureTokenStorage.clearToken()
                 _currentUser.value = null
                 Result.success(Unit)
             } else {
@@ -75,8 +74,8 @@ class AuthRepositoryImpl @Inject constructor(
     }
 
     override suspend fun isLoggedIn(): Boolean {
-        return _currentUser.value != null && authToken != null
+        return _currentUser.value != null && secureTokenStorage.hasToken()
     }
 
-    fun getAuthToken(): String? = authToken
+    fun getAuthToken(): String? = secureTokenStorage.getToken()
 }
