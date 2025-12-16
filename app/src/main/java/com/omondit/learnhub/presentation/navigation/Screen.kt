@@ -2,6 +2,8 @@ package com.omondit.learnhub.presentation.navigation
 
 
 sealed class Screen(val route: String) {
+    data object Settings : Screen("settings")
+    data object Search : Screen("search")
     data object Splash : Screen("splash")
     data object Login : Screen("login")
     data object Register : Screen("register")
@@ -41,4 +43,7 @@ sealed class Screen(val route: String) {
     data object ExamPreview : Screen("exam_preview/{examId}") {
         fun createRoute(examId: String) = "exam_preview/$examId"
     }
+
+    data object Analytics : Screen("analytics")
+    data object Leaderboard : Screen("leaderboard")
 }

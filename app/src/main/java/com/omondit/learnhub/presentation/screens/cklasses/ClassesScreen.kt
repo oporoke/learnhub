@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -24,6 +25,7 @@ import com.omondit.learnhub.presentation.util.UiState
 @Composable
 fun ClassesScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToSubjects: (String) -> Unit,
     onClassClick: (String) -> Unit,
     viewModel: ClassesViewModel = hiltViewModel()
 ) {
@@ -44,44 +46,53 @@ fun ClassesScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = classesState is UiState.Loading,
+            onRefresh = { viewModel.loadClasses() },
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            when (val state = classesState) {
-                is UiState.Idle -> {
-                    // Should not happen since we load in init
-                }
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                when (val state = classesState) {
+                    is UiState.Idle -> {
+                        // Should not happen since we load in init
+                    }
 
-                is UiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                is UiState.Success -> {
-                    if (state.data.isEmpty()) {
-                        EmptyState(
+                    is UiState.Loading -> {
+                        CircularProgressIndicator(
                             modifier = Modifier.align(Alignment.Center)
                         )
-                    } else {
-                        ClassesList(
-                            classes = state.data,
-                            onClassClick = onClassClick
+                    }
+
+                    is UiState.Success -> {
+                        if (state.data.isEmpty()) {
+                            EmptyState(
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        } else {
+                            ClassesList(
+                                classes = state.data,
+                                onClassClick = onClassClick
+                            )
+                        }
+                    }
+
+                    is UiState.Error -> {
+                        ErrorState(
+                            message = state.message,
+                            onRetry = { viewModel.loadClasses() },
+                            modifier = Modifier.align(Alignment.Center)
                         )
                     }
                 }
-
-                is UiState.Error -> {
-                    ErrorState(
-                        message = state.message,
-                        onRetry = { viewModel.loadClasses() },
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
             }
         }
+
     }
 }
 

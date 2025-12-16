@@ -23,7 +23,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Content
 import com.omondit.learnhub.domain.model.ContentType
+import com.omondit.learnhub.presentation.components.PdfViewerComposable
 import com.omondit.learnhub.presentation.util.UiState
+import com.omondit.learnhub.presentation.components.VideoPlayerComposable
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -212,8 +214,10 @@ private fun ContentCard(
                     ContentType.TEXT -> "📝 Reading"
                     ContentType.IMAGE -> "🖼️ Visual"
                     ContentType.VIDEO -> "🎥 Video"
+                    ContentType.PDF -> "📄 PDF Document"
                     ContentType.TEXT_IMAGE -> "📝 Reading + Visual"
                     ContentType.TEXT_VIDEO -> "📝 Reading + Video"
+                    ContentType.TEXT_PDF -> "📝 Reading + PDF"
                 },
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
@@ -243,39 +247,46 @@ private fun ContentCard(
         }
 
         // Image placeholder
-        if (content.body.imageUrl != null) {
+        if (content.body.videoUrl != null) {
             Spacer(modifier = Modifier.height(24.dp))
 
-            Card(
+            VideoPlayerComposable(
+                videoUrl = content.body.videoUrl,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(
-                            text = "🖼️",
-                            fontSize = 48.sp
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Image would display here",
-                            textAlign = TextAlign.Center,
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
+                    .height(250.dp)
+            )
         }
+//            Card(
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(200.dp),
+//                colors = CardDefaults.cardColors(
+//                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+//                )
+//            ) {
+//                Box(
+//                    modifier = Modifier.fillMaxSize(),
+//                    contentAlignment = Alignment.Center
+//                ) {
+//                    Column(
+//                        horizontalAlignment = Alignment.CenterHorizontally
+//                    ) {
+//                        Text(
+//                            text = "🖼️",
+//                            fontSize = 48.sp
+//                        )
+//                        Spacer(modifier = Modifier.height(8.dp))
+//                        Text(
+//                            text = "Image would display here",
+//                            textAlign = TextAlign.Center,
+//                            fontSize = 14.sp,
+//                            color = MaterialTheme.colorScheme.onSurfaceVariant
+//                        )
+//                    }
+//                }
+//            }
+//        }
 
         // Video placeholder
         if (content.body.videoUrl != null) {
@@ -310,6 +321,17 @@ private fun ContentCard(
                     }
                 }
             }
+        }
+        // PDF loading
+        if (content.body.pdfUrl != null) {
+            Spacer(modifier = Modifier.height(24.dp))
+
+            PdfViewerComposable(
+                pdfUrl = content.body.pdfUrl,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(500.dp)
+            )
         }
 
         Spacer(modifier = Modifier.height(32.dp))

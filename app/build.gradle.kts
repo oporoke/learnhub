@@ -56,8 +56,8 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
-    implementation("androidx.compose.material:material-icons-extended:1.0.0")
-    implementation("androidx.compose.material:material-icons-extended")
+    implementation("androidx.compose.material:material-icons-extended:1.7.8")
+//    implementation("androidx.compose.material:material-icons-extended")
 
     // Compose Navigation
     implementation(libs.androidx.navigation.compose)
@@ -90,6 +90,15 @@ dependencies {
 
     // DataStore (for preferences)
     implementation(libs.androidx.datastore.preferences)
+
+    // ExoPlayer for video playback
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
+    implementation(libs.androidx.media3.common)
+
+    // PDF Viewer
+//    implementation("com.github.barteksc:android-pdf-viewer:2.8.2")
+    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
 
     // Testing
     testImplementation(libs.junit)

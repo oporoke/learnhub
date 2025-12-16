@@ -15,13 +15,16 @@ enum class ContentType {
     IMAGE,
     VIDEO,
     TEXT_IMAGE,
-    TEXT_VIDEO
+    TEXT_VIDEO,
+    PDF, // Add this
+    TEXT_PDF // Add this
 }
 
 data class ContentBody(
     val text: String? = null,
     val imageUrl: String? = null,
-    val videoUrl: String? = null
+    val videoUrl: String? = null,
+    val pdfUrl: String? = null // Add this
 )
 
 enum class ContentStatus {

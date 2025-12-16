@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Topic
+import com.omondit.learnhub.presentation.components.ShimmerListItem
 import com.omondit.learnhub.presentation.util.UiState
 import kotlin.math.roundToInt
 
@@ -57,9 +58,14 @@ fun TopicsScreen(
                 }
 
                 is UiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        repeat(3) {
+                            ShimmerListItem()
+                        }
+                    }
                 }
 
                 is UiState.Success -> {
@@ -96,7 +102,10 @@ private fun TopicsList(
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        items(topics) { topicWithProgress ->
+        items(
+            items = topics,
+            key = { topicWithProgress -> topicWithProgress.topic.id }
+        ) { topicWithProgress ->
             TopicCard(
                 topicWithProgress = topicWithProgress,
                 onClick = { onTopicClick(topicWithProgress.topic.id) }

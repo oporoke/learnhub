@@ -51,4 +51,13 @@ interface ProgressDao {
 
     @Query("DELETE FROM topic_progress WHERE userId = :userId")
     suspend fun clearUserTopicProgress(userId: String)
+
+    @Query("SELECT * FROM content_progress WHERE userId = :userId")
+    suspend fun getContentProgressByUser(userId: String): List<ContentProgressEntity>
+
+    @Query("SELECT * FROM subtopic_progress WHERE userId = :userId")
+    suspend fun getSubtopicProgressByUser(userId: String): List<SubtopicProgressEntity>
+
+    @Query("SELECT * FROM topic_progress WHERE userId = :userId")
+    suspend fun getTopicProgressByUser(userId: String): List<TopicProgressEntity>
 }

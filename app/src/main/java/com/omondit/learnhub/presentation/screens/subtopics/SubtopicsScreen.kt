@@ -6,6 +6,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.PlayCircle
 import androidx.compose.material3.*
@@ -21,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Subtopic
 import com.omondit.learnhub.presentation.util.UiState
+import com.omondit.learnhub.util.rememberHapticFeedback
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +34,7 @@ fun SubtopicsScreen(
     viewModel: SubtopicsViewModel = hiltViewModel()
 ) {
     val subtopicsState by viewModel.subtopicsState.collectAsStateWithLifecycle()
+    val haptic = rememberHapticFeedback()
 
     Scaffold(
         topBar = {
@@ -69,9 +73,20 @@ fun SubtopicsScreen(
                             modifier = Modifier.align(Alignment.Center)
                         )
                     } else {
+                        val bookmarked by viewModel.bookmarkedSubtopics.collectAsStateWithLifecycle()
+
                         SubtopicsList(
                             subtopics = state.data,
-                            onSubtopicClick = onSubtopicClick
+                            bookmarkedSubtopics = bookmarked,
+                            onSubtopicClick = { onSubtopicClick(it) },
+                            onBookmarkClick = { subtopic ->
+                                haptic.click()
+                                viewModel.toggleBookmark(
+                                    subtopic.subtopic.id,
+                                    subtopic.subtopic.name,
+                                    subtopic.subtopic.description
+                                )
+                            }
                         )
                     }
                 }
@@ -91,7 +106,9 @@ fun SubtopicsScreen(
 @Composable
 private fun SubtopicsList(
     subtopics: List<SubtopicWithProgress>,
-    onSubtopicClick: (String) -> Unit
+    bookmarkedSubtopics: Set<String>,
+    onSubtopicClick: (String) -> Unit,
+    onBookmarkClick: (SubtopicWithProgress) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(16.dp),
@@ -100,7 +117,11 @@ private fun SubtopicsList(
         items(subtopics) { subtopicWithProgress ->
             SubtopicCard(
                 subtopicWithProgress = subtopicWithProgress,
-                onClick = { onSubtopicClick(subtopicWithProgress.subtopic.id) }
+                isBookmarked = bookmarkedSubtopics.contains(subtopicWithProgress.subtopic.id),
+                onClick = { onSubtopicClick(subtopicWithProgress.subtopic.id) },
+                onBookmarkClick = {
+                    onBookmarkClick(subtopicWithProgress)
+                }
             )
         }
     }
@@ -109,7 +130,9 @@ private fun SubtopicsList(
 @Composable
 private fun SubtopicCard(
     subtopicWithProgress: SubtopicWithProgress,
-    onClick: () -> Unit
+    isBookmarked: Boolean,
+    onClick: () -> Unit,
+    onBookmarkClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -197,6 +220,19 @@ private fun SubtopicCard(
                             .height(4.dp),
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Bookmark button
+            IconButton(
+                onClick = onBookmarkClick
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                    contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                    tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

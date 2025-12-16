@@ -102,6 +102,46 @@ class MockContentRepositoryImpl @Inject constructor() : ContentRepository {
             ),
             status = ContentStatus.PUBLISHED,
             createdAt = System.currentTimeMillis()
+        ),
+        Content(
+            id = "content4",
+            subtopicId = "linear_eq",
+            creatorId = "creator1",
+            contentType = ContentType.TEXT_IMAGE,
+            body = ContentBody(
+                text = "To solve a linear equation, isolate the variable on one side.\n\nSteps:\n1. Simplify both sides\n2. Move variables to one side\n3. Move constants to other side\n4. Divide to isolate variable",
+                imageUrl = "https://picsum.photos/400/300", // Random placeholder image
+                videoUrl = null
+            ),
+            status = ContentStatus.PUBLISHED,
+            createdAt = System.currentTimeMillis()
+        ),
+        Content(
+            id = "content5",
+            subtopicId = "linear_eq",
+            creatorId = "creator1",
+            contentType = ContentType.TEXT_VIDEO,
+            body = ContentBody(
+                text = "Watch this video explanation of solving linear equations step by step.",
+                imageUrl = null,
+                videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" // Sample video
+            ),
+            status = ContentStatus.PUBLISHED,
+            createdAt = System.currentTimeMillis()
+        ),
+        Content(
+            id = "content_pdf",
+            subtopicId = "linear_eq",
+            creatorId = "creator1",
+            contentType = ContentType.TEXT_PDF,
+            body = ContentBody(
+                text = "📄 Linear Equations Study Guide\n\nThis comprehensive PDF covers all aspects of linear equations including:\n• Basic concepts\n• Solving methods\n• Word problems\n• Practice exercises",
+                imageUrl = null,
+                videoUrl = null,
+                pdfUrl = "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" // Sample PDF
+            ),
+            status = ContentStatus.PUBLISHED,
+            createdAt = System.currentTimeMillis()
         )
     )
 

@@ -7,16 +7,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,77 +62,116 @@ class HomeViewModel @Inject constructor(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToClasses: () -> Unit,
     onNavigateToTeacherDashboard: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToAnalytics: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("LearnHub Kenya") },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = "LearnHub Kenya",
-            fontSize = 32.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        currentUser?.let { user ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = "Welcome, ${user.name}",
-                fontSize = 16.sp,
-                modifier = Modifier.padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                text = "LearnHub Kenya",
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            currentUser?.let { user ->
+                Text(
+                    text = "Welcome, ${user.name}",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
 
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = MaterialTheme.shapes.small
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = MaterialTheme.shapes.small
+                ) {
+                    Text(
+                        text = when (user.role) {
+                            UserRole.STUDENT -> "👨‍🎓 Student"
+                            UserRole.TEACHER -> "👨‍🏫 Teacher"
+                            UserRole.ADMIN -> "👨‍💼 Admin"
+                            UserRole.COURSE_CREATOR -> "✍️ Course Creator"
+                        },
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(48.dp))
+
+            // Role-based navigation
+            when (currentUser?.role) {
+                UserRole.STUDENT -> {
+                    StudentHomeContent(onNavigateToClasses, onNavigateToSearch, onNavigateToLeaderboard)
+                }
+
+                UserRole.TEACHER -> {
+                    TeacherHomeContent(
+                        onNavigateToClasses = onNavigateToClasses,
+                        onNavigateToTeacherDashboard = onNavigateToTeacherDashboard
+                    )
+                }
+
+                UserRole.ADMIN -> {
+                    AdminHomeContent()
+                }
+
+                UserRole.COURSE_CREATOR -> {
+                    CreatorHomeContent()
+                }
+
+                null -> {
+                    CircularProgressIndicator()
+                }
+            }
+
+            OutlinedButton(
+                onClick = onNavigateToAnalytics,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
             ) {
                 Text(
-                    text = when (user.role) {
-                        UserRole.STUDENT -> "👨‍🎓 Student"
-                        UserRole.TEACHER -> "👨‍🏫 Teacher"
-                        UserRole.ADMIN -> "👨‍💼 Admin"
-                        UserRole.COURSE_CREATOR -> "✍️ Course Creator"
-                    },
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                    text = "📊 My Progress",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(48.dp))
-
-        // Role-based navigation
-        when (currentUser?.role) {
-            UserRole.STUDENT -> {
-                StudentHomeContent(onNavigateToClasses)
-            }
-            UserRole.TEACHER -> {
-                TeacherHomeContent(
-                    onNavigateToClasses = onNavigateToClasses,
-                    onNavigateToTeacherDashboard = onNavigateToTeacherDashboard
-                )
-            }
-            UserRole.ADMIN -> {
-                AdminHomeContent()
-            }
-            UserRole.COURSE_CREATOR -> {
-                CreatorHomeContent()
-            }
-            null -> {
-                CircularProgressIndicator()
             }
         }
     }
@@ -131,7 +179,9 @@ fun HomeScreen(
 
 @Composable
 private fun StudentHomeContent(
-    onNavigateToClasses: () -> Unit
+    onNavigateToClasses: () -> Unit,
+    onNavigateToSearch: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
@@ -149,9 +199,40 @@ private fun StudentHomeContent(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp)
+                .semantics {
+                    contentDescription = "Start Learning - Browse classes and subjects"
+                }
         ) {
             Text(
                 text = "Start Learning",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        OutlinedButton(
+            onClick = onNavigateToSearch,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Text(
+                text = "🔍 Search Content",
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        OutlinedButton(
+            onClick = onNavigateToLeaderboard,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp)
+        ) {
+            Text(
+                text = "🏆 Leaderboard",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.SemiBold
             )

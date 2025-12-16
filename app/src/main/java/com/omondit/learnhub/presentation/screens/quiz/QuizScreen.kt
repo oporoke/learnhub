@@ -25,6 +25,7 @@ import com.omondit.learnhub.domain.model.Quiz
 import com.omondit.learnhub.domain.model.QuizAnswer
 import com.omondit.learnhub.domain.model.QuizResult
 import com.omondit.learnhub.presentation.util.UiState
+import com.omondit.learnhub.util.rememberHapticFeedback
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,6 +37,7 @@ fun QuizScreen(
     val quizState by viewModel.quizState.collectAsStateWithLifecycle()
     val submitState by viewModel.submitState.collectAsStateWithLifecycle()
     val currentIndex by viewModel.currentQuestionIndex.collectAsStateWithLifecycle()
+
 
     // Navigate to results when quiz is submitted
     LaunchedEffect(submitState) {
@@ -119,6 +121,7 @@ private fun QuizContent(
         initialPage = currentIndex,
         pageCount = { quiz.questions.size }
     )
+    val haptic = rememberHapticFeedback()
 
     LaunchedEffect(pagerState.currentPage) {
         viewModel.goToQuestion(pagerState.currentPage)
@@ -188,7 +191,9 @@ private fun QuizContent(
                     }
 
                     Button(
-                        onClick = { viewModel.submitQuiz() },
+                        onClick = {
+                            haptic.success()
+                            viewModel.submitQuiz() },
                         enabled = viewModel.isQuizComplete() && submitState !is UiState.Loading,
                         modifier = Modifier.fillMaxWidth()
                     ) {

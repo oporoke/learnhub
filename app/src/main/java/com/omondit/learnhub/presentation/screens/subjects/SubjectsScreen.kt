@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.omondit.learnhub.domain.model.Subject
+import com.omondit.learnhub.presentation.components.ShimmerCardGrid
 import com.omondit.learnhub.presentation.util.UiState
 
 
@@ -57,8 +58,9 @@ fun SubjectsScreen(
                 }
 
                 is UiState.Loading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center)
+                    ShimmerCardGrid(
+                        modifier = Modifier.padding(16.dp),
+                        itemCount = 4
                     )
                 }
 

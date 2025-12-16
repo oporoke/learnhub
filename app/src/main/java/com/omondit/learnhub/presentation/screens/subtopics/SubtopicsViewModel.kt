@@ -3,8 +3,11 @@ package com.omondit.learnhub.presentation.screens.subtopics
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.omondit.learnhub.domain.model.BookmarkType
 import com.omondit.learnhub.domain.model.Subtopic
 import com.omondit.learnhub.domain.usecase.auth.GetCurrentUserUseCase
+import com.omondit.learnhub.domain.usecase.bookmark.IsBookmarkedUseCase
+import com.omondit.learnhub.domain.usecase.bookmark.ToggleBookmarkUseCase
 import com.omondit.learnhub.domain.usecase.content.GetSubtopicsUseCase
 import com.omondit.learnhub.domain.usecase.progress.ObserveSubtopicProgressUseCase
 import com.omondit.learnhub.presentation.util.UiState
@@ -15,19 +18,69 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
 data class SubtopicWithProgress(
     val subtopic: Subtopic,
     val progress: Float = 0f
 )
+
+//private val toggleBookmarkUseCase: ToggleBookmarkUseCase
+//private val isBookmarkedUseCase: IsBookmarkedUseCase
 
 @HiltViewModel
 class SubtopicsViewModel @Inject constructor(
     private val getSubtopicsUseCase: GetSubtopicsUseCase,
     private val getCurrentUserUseCase: GetCurrentUserUseCase,
     private val observeSubtopicProgressUseCase: ObserveSubtopicProgressUseCase,
+    private val toggleBookmarkUseCase: ToggleBookmarkUseCase,
+    private val isBookmarkedUseCase: IsBookmarkedUseCase,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+
+    private val _bookmarkedSubtopics = MutableStateFlow<Set<String>>(emptySet())
+    val bookmarkedSubtopics: StateFlow<Set<String>> = _bookmarkedSubtopics.asStateFlow()
+
+    fun toggleBookmark(subtopicId: String, title: String, description: String) {
+        val userId = currentUserId ?: return
+
+        viewModelScope.launch {
+            val result = toggleBookmarkUseCase(
+                ToggleBookmarkUseCase.Params(
+                    userId = userId,
+                    itemType = BookmarkType.SUBTOPIC,
+                    itemId = subtopicId,
+                    itemTitle = title,
+                    itemDescription = description
+                )
+            )
+
+            result.fold(
+                onSuccess = { isBookmarked ->
+                    if (isBookmarked) {
+                        _bookmarkedSubtopics.value = _bookmarkedSubtopics.value + subtopicId
+                    } else {
+                        _bookmarkedSubtopics.value = _bookmarkedSubtopics.value - subtopicId
+                    }
+                },
+                onFailure = { /* Handle error */ }
+            )
+        }
+    }
+
+    private fun checkBookmarks(subtopics: List<Subtopic>) {
+        val userId = currentUserId ?: return
+
+        viewModelScope.launch {
+            val bookmarked = mutableSetOf<String>()
+            subtopics.forEach { subtopic ->
+                if (isBookmarkedUseCase(userId, BookmarkType.SUBTOPIC, subtopic.id)) {
+                    bookmarked.add(subtopic.id)
+                }
+            }
+            _bookmarkedSubtopics.value = bookmarked
+        }
+    }
     private val topicId: String = checkNotNull(savedStateHandle["topicId"])
 
     private val _subtopicsState = MutableStateFlow<UiState<List<SubtopicWithProgress>>>(UiState.Idle)
@@ -53,6 +106,7 @@ class SubtopicsViewModel @Inject constructor(
                     val userId = currentUserId
                     if (userId != null && subtopicsList.isNotEmpty()) {
                         // Observe progress for all subtopics
+                        checkBookmarks(subtopicsList)
                         observeSubtopicProgressUseCase(
                             userId = userId,
                             subtopicIds = subtopicsList.map { it.id }
